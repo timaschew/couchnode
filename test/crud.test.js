@@ -544,6 +544,52 @@ describe('#crud', function () {
           }));
         });
       });
+
+      describe.only('listPrepend', function() {
+        testBadBasic(function (key, options, callback) {
+          H.b.prepend(key, 'foo', options, callback);
+        });
+        testBadDura(function(key, options, callback) {
+          H.b.prepend(key, 'foo', options, callback);
+        });
+
+        it('should prepend a value to a list', function(done) {
+          var key = H.key();
+          H.b.insert(key, [], H.okCallback(function(insertRes) {
+            H.b.listPrepend(key, 'bar', H.okCallback(function(firstItemAppendRes) {
+              assert.notDeepEqual(insertRes.cas, firstItemAppendRes.cas);
+              H.b.listPrepend(key, 'foo', H.okCallback(function(secondItemAppendRes) {
+                // TODO: check why cas values aren't different
+                assert.notDeepEqual(firstItemAppendRes.cas, secondItemAppendRes.cas);
+                H.b.get(key, H.okCallback(function(getRes) {
+                  assert.deepEqual(getRes.cas, secondItemAppendRes.cas);
+                  assert.deepEqual(getRes.value, ['foo','bar']);
+                  done();
+                }));
+              }));
+            }));
+          }));
+        });
+        it('should fail on missing key', function(done) {
+          H.b.prepend(H.key(), 'foo', function(err, res) {
+            assert(err);
+            assert(!res);
+            done();
+          });
+        });
+        it('should fail on a locked key', function(done) {
+          var key = H.key();
+          H.b.insert(key, 'foo', H.okCallback(function(){
+            H.b.getAndLock(key, H.okCallback(function() {
+              H.b.prepend(key, 'bar', function(err, res) {
+                assert(err);
+                assert(!res);
+                done();
+              });
+            }));
+          }));
+        });
+      })
     });
 
     it('should successfully round-trip a document', function (done) {
