@@ -555,18 +555,15 @@ describe('#crud', function () {
 
         it('should prepend a value to a list', function(done) {
           var key = H.key();
-          H.b.insert(key, [], H.okCallback(function(insertRes) {
-            H.b.listPrepend(key, 'bar', H.okCallback(function(firstItemAppendRes) {
-              assert.notDeepEqual(insertRes.cas, firstItemAppendRes.cas);
-              H.b.listPrepend(key, 'foo', H.okCallback(function(secondItemAppendRes) {
-                // TODO: check why cas values aren't different
-                assert.notDeepEqual(firstItemAppendRes.cas, secondItemAppendRes.cas);
-                H.b.get(key, H.okCallback(function(getRes) {
-                  assert.deepEqual(getRes.cas, secondItemAppendRes.cas);
-                  assert.deepEqual(getRes.value, ['foo','bar']);
-                  done();
-                }));
+          H.b.insert(key, ['bar'], H.okCallback(function(insertRes) {
+            H.b.listPrepend(key, 'foo', H.okCallback(function(appendRes) {
+              assert.notDeepEqual(insertRes.cas, appendRes.cas);
+              H.b.get(key, H.okCallback(function(getRes) {
+                assert.deepEqual(getRes.cas, appendRes.cas);
+                assert.deepEqual(getRes.value, ['foo','bar']);
+                done();
               }));
+
             }));
           }));
         });
