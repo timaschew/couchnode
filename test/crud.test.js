@@ -569,7 +569,7 @@ describe('#crud', function () {
         });
 
         it('should fail on missing key', function(done) {
-          H.b.prepend(H.key(), 'foo', function(err, res) {
+          H.b.listPrepend(H.key(), ['foo'], function(err, res) {
             assert(err);
             assert(!res);
             done();
@@ -577,9 +577,9 @@ describe('#crud', function () {
         });
         it('should fail on a locked key', function(done) {
           var key = H.key();
-          H.b.insert(key, 'foo', H.okCallback(function(){
+          H.b.insert(key, ['foo'], H.okCallback(function(){
             H.b.getAndLock(key, H.okCallback(function() {
-              H.b.prepend(key, 'bar', function(err, res) {
+              H.b.listPrepend(key, 'bar', function(err, res) {
                 assert(err);
                 assert(!res);
                 done();
