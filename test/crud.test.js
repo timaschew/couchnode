@@ -546,13 +546,6 @@ describe('#crud', function () {
       });
 
       describe.only('listPrepend', function() {
-        testBadBasic(function (key, options, callback) {
-          H.b.prepend(key, 'foo', options, callback);
-        });
-        testBadDura(function(key, options, callback) {
-          H.b.prepend(key, 'foo', options, callback);
-        });
-
         it('should prepend a value to a list', function(done) {
           var key = H.key();
           H.b.insert(key, ['bar'], H.okCallback(function(insertRes) {
@@ -567,6 +560,14 @@ describe('#crud', function () {
             }));
           }));
         });
+
+        testBadBasic(function (key, options, callback) {
+          H.b.listPrepend(key, ['foo'], options, callback);
+        });
+        testBadDura(function(key, options, callback) {
+          H.b.listPrepend(key, ['foo'], options, callback);
+        });
+
         it('should fail on missing key', function(done) {
           H.b.prepend(H.key(), 'foo', function(err, res) {
             assert(err);
