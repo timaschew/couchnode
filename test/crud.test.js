@@ -545,7 +545,7 @@ describe('#crud', function () {
         });
       });
 
-      describe.only('listPrepend', function() {
+      describe('listPrepend', function() {
         it('should prepend a value to a list', function(done) {
           var key = H.key();
           H.b.insert(key, ['bar'], H.okCallback(function(insertRes) {
@@ -580,6 +580,90 @@ describe('#crud', function () {
           H.b.insert(key, ['foo'], H.okCallback(function(){
             H.b.getAndLock(key, H.okCallback(function() {
               H.b.listPrepend(key, 'bar', function(err, res) {
+                assert(err);
+                assert(!res);
+                done();
+              });
+            }));
+          }));
+        });
+      })
+
+      describe('listAppend', function() {
+        it('should append a value to a list', function(done) {
+          var key = H.key();
+          H.b.insert(key, ['bar'], H.okCallback(function(insertRes) {
+            H.b.listAppend(key, 'foo', H.okCallback(function(appendRes) {
+              assert.notDeepEqual(insertRes.cas, appendRes.cas);
+              H.b.get(key, H.okCallback(function(getRes) {
+                assert.deepEqual(getRes.cas, appendRes.cas);
+                assert.deepEqual(getRes.value, ['bar', 'foo']);
+                done();
+              }));
+
+            }));
+          }));
+        });
+
+        testBadBasic(function (key, options, callback) {
+          H.b.listAppend(key, ['foo'], options, callback);
+        });
+        testBadDura(function(key, options, callback) {
+          H.b.listAppend(key, ['foo'], options, callback);
+        });
+
+        it('should fail on missing key', function(done) {
+          H.b.listAppend(H.key(), ['foo'], function(err, res) {
+            assert(err);
+            assert(!res);
+            done();
+          });
+        });
+        it('should fail on a locked key', function(done) {
+          var key = H.key();
+          H.b.insert(key, ['foo'], H.okCallback(function(){
+            H.b.getAndLock(key, H.okCallback(function() {
+              H.b.listAppend(key, 'bar', function(err, res) {
+                assert(err);
+                assert(!res);
+                done();
+              });
+            }));
+          }));
+        });
+      })
+
+      describe.skip('listGet', function() {
+        it('should get a value from an index in a list', function(done) {
+          var key = H.key();
+          H.b.insert(key, ['bar','foo'], H.okCallback(function(insertRes) {
+            H.b.listGet(key, 1, H.okCallback(function(listGetRes) {
+              assert.notDeepEqual(insertRes.cas, listGetRes.cas);
+              assert.deepEqual(listGetRes.value, 'foo');
+              done();
+            }));
+          }));
+        });
+
+        testBadBasic(function (key, options, callback) {
+          H.b.listGet(key, 0, options, callback);
+        });
+        testBadDura(function(key, options, callback) {
+          H.b.listGet(key, 0, options, callback);
+        });
+
+        it('should fail on missing key', function(done) {
+          H.b.listGet(H.key(), 0, function(err, res) {
+            assert(err);
+            assert(!res);
+            done();
+          });
+        });
+        it('should fail on a locked key', function(done) {
+          var key = H.key();
+          H.b.insert(key, ['foo'], H.okCallback(function(){
+            H.b.getAndLock(key, H.okCallback(function() {
+              H.b.listGet(key, 0, function(err, res) {
                 assert(err);
                 assert(!res);
                 done();
