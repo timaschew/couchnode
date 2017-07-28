@@ -1,5 +1,5 @@
 var couchbase = require("./lib/couchbase.js"),
-    http = require("http"),
+    http = require("https"),
     fs = require("fs"),
     util = require("util");
 
